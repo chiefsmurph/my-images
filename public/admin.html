@@ -11,12 +11,25 @@
       <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
     <style>
-    body {
+    html, body {
       text-align: center;
+      padding: 0;
+      margin: 0;
     }
     input[type="image"], img {
       width: 20%;
       margin: auto;
+    }
+    table {
+      width: 100%;
+      margin-top: 30px;
+    }
+    table td {
+      padding: 60px;
+      background-color: lightgray;
+      text-align: center;
+      color: navy;
+      font-weight: bold;
     }
     </style>
     <script src="/bower_components/jquery/dist/jquery.min.js"></script>
@@ -53,7 +66,7 @@
     });
 
     $(document).ready(function() {
-      $(document).on('change blur', '#file-input', function () {
+      $('body').on('change', '#file-input', function () {
         alert("asd")
         var files = document.getElementById('file-input').files;
         var file = files[0];
@@ -65,10 +78,6 @@
         getSignedRequest(file);
       });
     });
-
-    (function() {
-
-    })();
 
     function getSignedRequest(file){
       var xhr = new XMLHttpRequest();
@@ -133,20 +142,19 @@
 
     var tbody = document.getElementById('tbody');
 
-    (function(obj) {
-      for (var i = 0; i < obj.length; i++) {
-        var tr = "<tr>";
-              tr += "<td>";
-                  tr += obj.id;
-              tr += "</td>";
-              tr += "<td>";
-                  tr += obj.url;
-              tr += "</td>"
-          tr += "</tr>"
-        /* We add the table row to the table body */
-        tbody.innerHTML += tr;
-      }
-    })(posts);
+    posts.forEach(function(post) {
+      console.log(post);
+      var tr = "<tr>";
+            tr += "<td>";
+                tr += post.id;
+            tr += "</td>";
+            tr += "<td>";
+                tr += post.url;
+            tr += "</td>"
+        tr += "</tr>"
+      /* We add the table row to the table body */
+      tbody.innerHTML += tr;
+    });
 
     </script>
 
