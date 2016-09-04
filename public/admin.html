@@ -49,11 +49,11 @@
     }
 
     $(uploadImg).on('click tap', function() {
-      simulateClick('file-input');
+      $('#file-input').trigger('click');
     });
 
     $(document).ready(function() {
-      $(document).on('change', function () {
+      $(document).on('change blur', '#file-input', function () {
         alert("asd")
         var files = document.getElementById('file-input').files;
         var file = files[0];
