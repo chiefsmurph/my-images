@@ -20,37 +20,37 @@
 
     <script>
 
+    // helpers
+    var _async = {
+      forEachSeries: function(array, fn, onComplete) {
+        onComplete = onComplete || function() {};
+        (function callFnOnIndex(index, err) {
+          if (index >= array.length || err) { return onComplete(err); }
+          fn(array[index], function(err) {
+            if (index < array.length - 1) {
+              callFnOnIndex(++index, err);
+            } else {
+              onComplete();
+            }
+          });
+        })(0);
+      },
+      waterfall: function(arrayFns, onComplete) {
+        onComplete = onComplete || function() {};
+        (function callFnNumber(index, passVal, err) {
+          if (!arrayFns[index] || err) { return onComplete(err); }
+          var args = [passVal, function(response, err) {
+            callFnNumber(++index, response, err);
+          }].filter(function(el) { return !!el; });
+          arrayFns[index].apply(arrayFns, args);
+        })(0);
+      }
+    };
+
+    var canvasContainer = document.getElementById('container');
     var pdfPreviewModule = (function() {
 
-      // helpers
-      var _async = {
-        forEachSeries: function(array, fn, onComplete) {
-          onComplete = onComplete || function() {};
-          (function callFnOnIndex(index, err) {
-            if (index >= array.length || err) { return onComplete(err); }
-            fn(array[index], function(err) {
-              if (index < array.length - 1) {
-                callFnOnIndex(++index, err);
-              } else {
-                onComplete();
-              }
-            });
-          })(0);
-        },
-        waterfall: function(arrayFns, onComplete) {
-          onComplete = onComplete || function() {};
-          (function callFnNumber(index, passVal, err) {
-            if (!arrayFns[index] || err) { return onComplete(err); }
-            var args = [passVal, function(response, err) {
-              callFnNumber(++index, response, err);
-            }].filter(function(el) { return !!el; });
-            arrayFns[index].apply(arrayFns, args);
-          })(0);
-        }
-      };
-
       var pdf = {};
-      var canvasContainer = document.getElementById('container');
 
       // PDF.js related
       var PdfJsRelated = {
@@ -90,13 +90,13 @@
           }, onComplete);
         },
 
-        openPdfUrl: function(url) {
+        openPdfUrl: function(url, cb) {
 
           pdf.url = url;
           PDFJS.workerSrc = '/bower_components/pdfjs-dist/build/pdf.worker.js';
           return PDFJS.getDocument(url).then(function(doc) {
             pdf.doc = doc;
-            PdfJsRelated.renderAllPages(function() {});
+            PdfJsRelated.renderAllPages(cb);
           }).catch(function(error) {
 
             if (error.name === "InvalidPDFException") {
@@ -120,6 +120,13 @@
 
     })();
 
+    function appendImage(url, cb) {
+      var img = document.createElement("img");
+      img.src = url;
+      img.onLoad = cb();
+      canvasContainer.appendChild(img);
+    }
+
 
 
     function httpGet(theUrl) {
@@ -129,8 +136,26 @@
       return JSON.parse(xmlHttp.responseText);
     }
     var posts = httpGet('/posts');
+    posts = posts.reverse();
 
-    pdfPreviewModule.openPdf(posts[0]);
+
+    function getUrlExtension(url) {
+      var re = /(?:\.([^.]+))?$/;
+      return re.exec(url)[1];
+    }
+
+    _async.forEachSeries(posts, function(postObj, postCb) {
+      var ext = getUrlExtension(postObj.url);
+      if (ext === 'pdf') {
+        pdfPreviewModule.openPdf(postObj.url, function() {
+          setTimeout(postCb, 2000);
+        });
+      } else {
+        appendImage(postObj.url, function() {
+          setTimeout(postCb, 200)
+        });
+      }
+    });
 
     console.log(posts);
 

@@ -3,6 +3,6 @@ html, body {
   padding: 0;
   text-align: center;
 }
-canvas {
-  width: 99%;
+canvas, img {
+  width: 100%;
 }

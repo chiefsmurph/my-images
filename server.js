@@ -6,6 +6,8 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
+var cookieParser = require('cookie-parser');
+app.use(cookieParser());
 
 var dbRelated = require('./dbRelated');
 
@@ -54,24 +56,83 @@ function getAllPosts() {
   });
 })();
 
+app.get('/posts', function(req, res, next) {
+  res.json(allPosts);
+});
 
 
 
-app.post('/post', function(req, res, next) {
+// ADMIN
+
+var auth = function(req, res, next) {
+  // console.log('authorizing');
+  // console.log(req.cookies, process.env.adminPwd);
+  if (req.cookies.pwd === process.env.adminPwd) {
+    return next();
+    // console.log('pass')
+  } else {
+    // console.log('dail')
+    return res.status(400);
+  }
+};
+
+
+app.post('/post', auth, function(req, res, next) {
   console.log(req.body);
   var url = req.body.url;
   if (url) {
     dbRelated.addPost(url, function(err, result) {
-      res.json({
-        err: err,
-        result: result
-      });
-      console.log(err, result);
+      res.json( (err ? false : true) );
+      if (!err) {
+        console.log('successfully added ' + url);
+      } else {
+        console.log('failed to add ' + url);
+      }
       allPosts.push(result.rows[0]);
     });
   }
 });
 
-app.get('/posts', function(req, res, next) {
-  res.json(allPosts);
+app.use('/admin', auth, function(req, res) {
+  res.sendfile(__dirname + '/public/admin.html');
+});
+
+app.get('/verify/:pass', function(req, res) {
+  console.log('setting')
+    res.cookie('pwd', req.params.pass);
+    res.redirect('/admin');
+});
+
+
+
+// S3 FILE UPLOADS
+
+const aws = require('aws-sdk');
+
+var S3_BUCKET = process.env.S3_BUCKET;
+
+app.get('/sign-s3', (req, res) => {
+  const s3 = new aws.S3();
+  const fileName = req.query['file-name'];
+  const fileType = req.query['file-type'];
+  const s3Params = {
+    Bucket: S3_BUCKET,
+    Key: fileName,
+    Expires: 60,
+    ContentType: fileType,
+    ACL: 'public-read'
+  };
+
+  s3.getSignedUrl('putObject', s3Params, (err, data) => {
+    if(err){
+      console.log(err);
+      return res.end();
+    }
+    const returnData = {
+      signedRequest: data,
+      url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`
+    };
+    res.write(JSON.stringify(returnData));
+    res.end();
+  });
 });
