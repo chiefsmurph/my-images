@@ -3,30 +3,137 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Your P0ST">
+    <meta name="description" content="Sunshine Austina's sweet feed">
     <meta name="keywords" content="">
-    <meta name="author" content="John Murphy">
+    <meta name="author" content="Sunshine Austina">
     <title>John's Post</title>
     <link href="/css/styles.css" rel="stylesheet">
     <!--[if lt IE 9]>
       <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+    <script src="/bower_components/pdfjs-dist/web/compatibility.js"></script>
+    <script src="/bower_components/pdfjs-dist/build/pdf.js"></script>
   </head>
   <body>
 
     <div id="container"></div>
 
     <script>
+
+    var pdfPreviewModule = (function() {
+
+      // helpers
+      var _async = {
+        forEachSeries: function(array, fn, onComplete) {
+          onComplete = onComplete || function() {};
+          (function callFnOnIndex(index, err) {
+            if (index >= array.length || err) { return onComplete(err); }
+            fn(array[index], function(err) {
+              if (index < array.length - 1) {
+                callFnOnIndex(++index, err);
+              } else {
+                onComplete();
+              }
+            });
+          })(0);
+        },
+        waterfall: function(arrayFns, onComplete) {
+          onComplete = onComplete || function() {};
+          (function callFnNumber(index, passVal, err) {
+            if (!arrayFns[index] || err) { return onComplete(err); }
+            var args = [passVal, function(response, err) {
+              callFnNumber(++index, response, err);
+            }].filter(function(el) { return !!el; });
+            arrayFns[index].apply(arrayFns, args);
+          })(0);
+        }
+      };
+
+      var pdf = {};
+      var canvasContainer = document.getElementById('container');
+
+      // PDF.js related
+      var PdfJsRelated = {
+
+        openPage: function(pageNumber, cb) {
+          var reqId = pdf.reqId;
+          pdf.doc.getPage(pageNumber).then(function(page) {
+            if (reqId !== pdf.reqId) { return; }
+            var viewport = page.getViewport(2);
+
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            var renderContext = {
+              canvasContext: ctx,
+              viewport: viewport
+            };
+
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            page.render(renderContext);
+            canvasContainer.appendChild(canvas);
+
+            pdf.docDimensions = pdf.docDimensions || {
+              width: viewport.width,
+              height: viewport.height
+            };
+
+            cb();
+          });
+        },
+
+        renderAllPages: function(onComplete) {
+          var pageArr = Array.apply(null, {length: pdf.doc.numPages}).map(Number.call, Number);
+          _async.forEachSeries(pageArr, function(pageNum, callback) {
+            PdfJsRelated.openPage(pageNum + 1, callback);
+          }, onComplete);
+        },
+
+        openPdfUrl: function(url) {
+
+          pdf.url = url;
+          PDFJS.workerSrc = '/bower_components/pdfjs-dist/build/pdf.worker.js';
+          return PDFJS.getDocument(url).then(function(doc) {
+            pdf.doc = doc;
+            PdfJsRelated.renderAllPages(function() {});
+          }).catch(function(error) {
+
+            if (error.name === "InvalidPDFException") {
+              console.error('Unable to load PDF');
+            } else if (error.name === "UnexpectedResponseException" && error.status === 0) {
+              console.error('Unable to load PDF. Check your internet connection.');
+            } else {
+              console.error(error.message);
+            }
+
+          });
+
+        }
+
+      }
+
+
+      return {
+        openPdf: PdfJsRelated.openPdfUrl
+      };
+
+    })();
+
+
+
     function httpGet(theUrl) {
       var xmlHttp = new XMLHttpRequest();
       xmlHttp.open("GET", theUrl, false);
       xmlHttp.send(null);
-      return xmlHttp.responseText;
+      return JSON.parse(xmlHttp.responseText);
     }
     var posts = httpGet('/posts');
 
-    
+    pdfPreviewModule.openPdf(posts[0]);
+
     console.log(posts);
+
     </script>
 
   </body>
