@@ -120,7 +120,29 @@
     }
     var posts = httpGet('/posts');
     posts = posts.reverse();
+
+    var tbody = document.getElementById('tbody');
+
+    ((obj) => {
+      for (var i = 0; i < obj.length; i++) {
+        var tr = "<tr>";
+              tr += "<td>";
+                  tr += obj.id;
+              tr += "</td>";
+              tr += "<td>";
+                  tr += obj.url;
+              tr += "</td>"
+          tr += "</tr>"
+        /* We add the table row to the table body */
+        tbody.innerHTML += tr;
+      }
+    })(posts);
+
     </script>
+
+    <table>
+      <tbody id="tbody"></tbody>
+    </table>
 
   </body>
 </html>
