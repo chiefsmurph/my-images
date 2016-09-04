@@ -1,0 +1,18 @@
+{
+  "name": "my-images",
+  "homepage": "https://github.com/chiefsmurph/my-images",
+  "authors": [
+    "John Murphy <chiefsmurph@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/bower_components",
+    "test",
+    "tests"
+  ]
+}
