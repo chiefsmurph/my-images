@@ -47,18 +47,18 @@
       simulateClick('file-input');
     });
 
-    (function() ({
-      document.getElementById("file-input").onchange = () => {
+    (function() {
+      document.getElementById("file-input").addEventListener('change', function () {
         alert('asd');
         const files = document.getElementById('file-input').files;
         const file = files[0];
-        if(file == null){
+        if (file == null) {
           return alert('No file selected.');
         }
         uploadImg.style.display = 'none';
         loadingImg.style.display = 'block';
         getSignedRequest(file);
-      };
+      });
     })();
 
     function getSignedRequest(file){
