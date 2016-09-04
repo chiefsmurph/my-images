@@ -29,6 +29,10 @@
     <img src="/img/success.png" style='display: none;' name='success'>
     <input type="file" id="file-input" style="" />
 
+    <table>
+      <tbody id="tbody"></tbody>
+    </table>
+
     <script>
     var uploadImg = document.querySelector('input[type="image"]');
     var loadingImg = document.querySelector('img[name="loading"]');
@@ -44,7 +48,7 @@
       (evt) ? el.dispatchEvent(evt) : (el.click && el.click());
     }
 
-    uploadImg.addEventListener('click tap', function() {
+    $(uploadImg).on('click tap', function() {
       simulateClick('file-input');
     });
 
@@ -141,10 +145,6 @@
     })(posts);
 
     </script>
-
-    <table>
-      <tbody id="tbody"></tbody>
-    </table>
 
   </body>
 </html>
