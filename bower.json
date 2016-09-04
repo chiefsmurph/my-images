@@ -16,6 +16,7 @@
     "tests"
   ],
   "dependencies": {
-    "pdfjs-dist": "^1.5.421"
+    "pdfjs-dist": "^1.5.421",
+    "jquery": "^3.1.0"
   }
 }

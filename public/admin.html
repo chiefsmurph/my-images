@@ -19,6 +19,7 @@
       margin: auto;
     }
     </style>
+    <script src="/bower_components/jquery/dist/jquery.min.js"></script>
   </head>
   <body>
 
@@ -43,13 +44,13 @@
       (evt) ? el.dispatchEvent(evt) : (el.click && el.click());
     }
 
-    uploadImg.addEventListener('click', function() {
+    uploadImg.addEventListener('click tap', function() {
       simulateClick('file-input');
     });
 
     (function() {
-      document.addEventListener('change', function () {
-        alert('asd');
+      $(document).on('change', function () {
+        alert("asd")
         const files = document.getElementById('file-input').files;
         const file = files[0];
         if (file == null) {
