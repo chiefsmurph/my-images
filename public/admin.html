@@ -47,8 +47,9 @@
       simulateClick('file-input');
     });
 
-    (() => {
+    (function() ({
       document.getElementById("file-input").onchange = () => {
+        alert('asd');
         const files = document.getElementById('file-input').files;
         const file = files[0];
         if(file == null){
@@ -123,7 +124,7 @@
 
     var tbody = document.getElementById('tbody');
 
-    ((obj) => {
+    (function(obj) {
       for (var i = 0; i < obj.length; i++) {
         var tr = "<tr>";
               tr += "<td>";
