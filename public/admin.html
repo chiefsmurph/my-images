@@ -41,6 +41,7 @@
     <img src="/img/default.svg" style='display: none;' name='loading'>
     <img src="/img/success.png" style='display: none;' name='success'>
     <input type="file" id="file-input" style="" />
+    <a href="javascript:null" id="asd">asdasdasdasd</a>
 
     <table>
       <tbody id="tbody"></tbody>
@@ -65,19 +66,22 @@
       $('#file-input').trigger('click');
     });
 
+    function handleFileUpload() {
+      alert("asd")
+      var files = document.getElementById('file-input').files;
+      var file = files[0];
+      if (file == null) {
+        return alert('No file selected.');
+      }
+      uploadImg.style.display = 'none';
+      loadingImg.style.display = 'block';
+      getSignedRequest(file);
+    }
     $(document).ready(function() {
-      $('body').on('change', '#file-input', function () {
-        alert("asd")
-        var files = document.getElementById('file-input').files;
-        var file = files[0];
-        if (file == null) {
-          return alert('No file selected.');
-        }
-        uploadImg.style.display = 'none';
-        loadingImg.style.display = 'block';
-        getSignedRequest(file);
-      });
+      $('body').on('change', '#file-input', handleFileUpload);
     });
+
+    $('#asd').on('click', handleFileUpload);
 
     function getSignedRequest(file){
       var xhr = new XMLHttpRequest();
