@@ -8,12 +8,12 @@ module.exports = {
     insert: 'INSERT INTO sunshine (url) VALUES($1) RETURNING *'
   },
   query: function(queryText, passVals, cb) {
-    if (!cb) { cb = passVals; }
+    if (!cb) { cb = passVals; passVals = []; }  // optional param
     pg.connect(process.env.DATABASE_URL + "?ssl=true", function(err, client, done) {
       if (err) {
         return cb(err);
       }
-      client.query(queryText, passVals || [], function(err, result) {
+      client.query(queryText, passVals, function(err, result) {
         cb(err, result);
         done();
       });

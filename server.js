@@ -65,13 +65,13 @@ app.get('/posts', function(req, res, next) {
 // ADMIN
 
 var auth = function(req, res, next) {
-  // console.log('authorizing');
-  // console.log(req.cookies, process.env.adminPwd);
+  console.log('authorizing');
+  console.log(req.cookies, process.env.adminPwd);
   if (req.cookies.pwd === process.env.adminPwd) {
+    console.log('pass')
     return next();
-    // console.log('pass')
   } else {
-    // console.log('dail')
+    console.log('dail')
     return res.status(400);
   }
 };
