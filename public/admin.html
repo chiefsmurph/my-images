@@ -29,8 +29,18 @@
       font-weight: bold;
       text-decoration: underline;
       font-weight: bold;
-      font-size: 137%;
+      font-size: 3vh;
       font-family: monospace;
+
+      -ms-word-break: break-all;
+      word-break: break-all;
+      /* Non standard for webkit */
+       word-break: break-word;
+
+      -webkit-hyphens: auto;
+         -moz-hyphens: auto;
+          -ms-hyphens: auto;
+              hyphens: auto;
     }
     </style>
     <script src="/bower_components/jquery/dist/jquery.min.js"></script>
