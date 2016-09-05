@@ -37,11 +37,13 @@
   <body>
 
     <br><br><br>
+
     <input type="image" src="/img/upload-25068_1280.png" style="border-width: 0; outline: none;"/>
+    <input type="file" id="file-input" style="" />
+
     <img src="/img/default.svg" style='display: none;' name='loading'>
     <img src="/img/success.png" style='display: none;' name='success'>
-    <input type="file" id="file-input" style="" />
-    <a href="javascript:null" id="asd">asdasdasdasd</a>
+    <img src="/img/fail.png" style='display: none;' name='fail'>
 
     <table>
       <tbody id="tbody"></tbody>
@@ -51,37 +53,48 @@
     var uploadImg = document.querySelector('input[type="image"]');
     var loadingImg = document.querySelector('img[name="loading"]');
     var successImg = document.querySelector('img[name="success"]');
+    var failImg = document.querySelector('img[name="fail"]');
 
-    function simulateClick(elId) {
-      var evt;
-      var el = document.getElementById(elId);
-      if (document.createEvent) {
-        evt = document.createEvent("MouseEvents");
-        evt.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-      }
-      (evt) ? el.dispatchEvent(evt) : (el.click && el.click());
-    }
+    var iconUI = (function() {
+
+      return {
+        loading: function() {
+          uploadImg.style.display = 'none';
+          loadingImg.style.display = 'block';
+        },
+        success: function() {
+          loadingImg.style.display = 'none';
+          successImg.style.display = 'block';
+        },
+        reset: function() {
+          successImg.style.display = 'none';
+          failImg.style.display = 'none';
+          uploadImg.style.display = 'block';
+        },
+        fail: function() {
+          loadingImg.style.display = 'none';
+          failImg.style.display = 'block';
+        }
+      };
+    })()
 
     $(uploadImg).on('click tap', function() {
       $('#file-input').trigger('click');
     });
 
     function handleFileUpload() {
-      alert("asd")
       var files = document.getElementById('file-input').files;
       var file = files[0];
       if (file == null) {
         return alert('No file selected.');
       }
-      uploadImg.style.display = 'none';
-      loadingImg.style.display = 'block';
+      iconUI.loading();
       getSignedRequest(file);
     }
     $(document).ready(function() {
       $('body').on('change', '#file-input', handleFileUpload);
     });
 
-    $('#asd').on('click', handleFileUpload);
 
     function getSignedRequest(file){
       var xhr = new XMLHttpRequest();
@@ -124,11 +137,9 @@
         console.log(this.responseText);
         if (this.responseText) {
           // successful upload
-          loadingImg.style.display = 'none';
-          successImg.style.display = 'block';
+          iconUI.success();
           setTimeout(function() {
-            successImg.style.display = 'none';
-            uploadImg.style.display = 'block';
+            iconUI.reset();
           }, 2000);
         }
       };
