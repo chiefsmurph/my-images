@@ -43,10 +43,17 @@ function getAllPosts() {
     if (err && err.code === '42P07') {
       console.log('table already exists');
 
-      // dbRelated.run('deleteAll', function(err, result) {
-        // console.log('deletedall');
-        getAllPosts();
-      // });
+      (function checkForDelete(shouldDelete) {
+        if (shouldDelete === 'true') {
+          dbRelated.run('deleteAll', function(err, result) {
+            console.log('deletedall');
+            getAllPosts();
+          });
+        } else {
+          getAllPosts();
+        }
+      })(process.env.clearSunshine);
+
     } else if (err) {
       console.log('error creating db...');
       console.log(err);
