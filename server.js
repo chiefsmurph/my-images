@@ -72,7 +72,7 @@ var auth = function(req, res, next) {
     return next();
   } else {
     console.log('dail')
-    return res.status(400);
+    return res.send(400);
   }
 };
 
