@@ -72,13 +72,12 @@ app.get('/posts', function(req, res, next) {
 // ADMIN
 
 var auth = function(req, res, next) {
-  console.log('authorizing');
-  console.log(req.cookies, process.env.adminPwd);
+  // console.log('authorizing');
   if (req.cookies.pwd === process.env.adminPwd) {
-    console.log('pass')
+    // console.log('pass')
     return next();
   } else {
-    console.log('dail')
+    console.log('BLOCKED ATTEMPT')
     return res.send(400);
   }
 };
@@ -106,8 +105,8 @@ app.use('/admin', auth, function(req, res) {
 
 app.get('/verify/:pass', function(req, res) {
   console.log('setting')
-    res.cookie('pwd', req.params.pass);
-    res.redirect('/admin');
+  res.cookie('pwd', req.params.pass);
+  res.redirect('/admin');
 });
 
 
@@ -115,11 +114,11 @@ app.get('/verify/:pass', function(req, res) {
 // S3 FILE UPLOADS
 
 const aws = require('aws-sdk');
-
 var S3_BUCKET = process.env.S3_BUCKET;
+const s3 = new aws.S3();
+
 
 app.get('/sign-s3', (req, res) => {
-  const s3 = new aws.S3();
   const fileName = req.query['file-name'];
   const fileType = req.query['file-type'];
   const s3Params = {
@@ -142,4 +141,67 @@ app.get('/sign-s3', (req, res) => {
     res.write(JSON.stringify(returnData));
     res.end();
   });
+});
+
+
+// DELETING ASSETS
+
+
+app.delete('/post/:id', auth, function(req, res) {
+  function getFilenameFromId(id) {
+    console.log(JSON.stringify(allPosts), id)
+    for (var i = 0; i < allPosts.length; i++) {
+      if (allPosts[i].id === id) {
+        var url = allPosts[i].url;
+        var filename = url.substring(url.lastIndexOf('/')+1);
+        return {
+          filename: filename,
+          index: i
+        };
+      } else {
+
+      }
+    }
+    return null;
+  }
+
+  var postId = Number(req.params.id);
+  var postSearch = getFilenameFromId(postId);
+  console.log(JSON.stringify(postSearch));
+  if (!postSearch) {
+    return res.send(404);
+  }
+
+  var filename = postSearch.filename;
+  var foundIndex = postSearch.index;
+  console.log('deleting' + filename);
+  var params = {
+    Bucket: S3_BUCKET,
+    Delete: { // required
+      Objects: [ // required
+        {
+          Key: filename // required
+        }
+      ],
+    },
+  };
+
+  s3.deleteObjects(params, function(err, data) {
+    if (err) {
+      console.log('error', err, err.stack); // an error occurred
+      return res.send(400);
+    } else {
+      dbRelated.deletePost(postId, function(err, result) {
+        if (err) {
+          console.log('picture deleted from aws s3 but not the database uh oh!!!');
+          return res.send(400);
+        } else {
+          console.log('successfully deleted ' + filename);
+          allPosts.splice(foundIndex, 1);
+          return res.send(200);
+        }
+      });
+    }
+  });
+
 });

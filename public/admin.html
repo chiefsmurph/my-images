@@ -109,8 +109,22 @@
       iconUI.loading();
       getSignedRequest(file);
     }
+
     $(document).ready(function() {
       $('body').on('change', '#file-input', handleFileUpload);
+
+      $(document).on('dblclick', 'tr', function() {
+        console.log('double')
+        var $tr = $(this);
+        var id = $tr.children().first().text();
+        $.ajax({
+          url: '/post/' + id,
+          type: 'DELETE',
+          success: function(result) {
+            $tr.remove();
+          }
+        });
+      });
     });
 
 
