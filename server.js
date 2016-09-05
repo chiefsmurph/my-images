@@ -43,10 +43,10 @@ function getAllPosts() {
     if (err && err.code === '42P07') {
       console.log('table already exists');
 
-      // dbRelated.run('deleteAll', function(err, result) {
-        // console.log('deletedall');
+      dbRelated.run('deleteAll', function(err, result) {
+        console.log('deletedall');
         getAllPosts();
-      // });
+      });
     } else if (err) {
       console.log('error creating db...');
       console.log(err);
