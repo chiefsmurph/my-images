@@ -5,4 +5,5 @@ html, body {
 }
 canvas, img {
   width: 100%;
+  display: block;
 }
