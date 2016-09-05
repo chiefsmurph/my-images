@@ -112,7 +112,7 @@
             uploadFile(file, response.signedRequest, response.url);
           }
           else{
-            alert('Could not get signed URL.');
+            //alert('Could not get signed URL.');
             iconUI.fail();
           }
         }
@@ -128,7 +128,7 @@
           if (xhr.status === 200){
             postPost(url);
           } else{
-            alert('Could not upload file.');
+            //alert('Could not upload file.');
             iconUI.fail();
           }
         }
