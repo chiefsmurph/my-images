@@ -175,7 +175,9 @@
                 tr += post.id;
             tr += "</td>";
             tr += "<td>";
-                tr += post.url;
+                var url = post.url;
+                var filename = url.substring(url.lastIndexOf('/')+1);
+                tr += filename;
             tr += "</td>"
         tr += "</tr>"
       /* We add the table row to the table body */
