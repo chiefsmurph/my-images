@@ -65,6 +65,9 @@
         success: function() {
           loadingImg.style.display = 'none';
           successImg.style.display = 'block';
+          setTimeout(function() {
+            this.reset();
+          }, 2000);
         },
         reset: function() {
           successImg.style.display = 'none';
@@ -74,6 +77,9 @@
         fail: function() {
           loadingImg.style.display = 'none';
           failImg.style.display = 'block';
+          setTimeout(function() {
+            this.reset();
+          }, 2000);
         }
       };
     })()
@@ -107,6 +113,7 @@
           }
           else{
             alert('Could not get signed URL.');
+            iconUI.fail();
           }
         }
       };
@@ -122,6 +129,7 @@
             postPost(url);
           } else{
             alert('Could not upload file.');
+            iconUI.fail();
           }
         }
       };
@@ -138,9 +146,8 @@
         if (this.responseText) {
           // successful upload
           iconUI.success();
-          setTimeout(function() {
-            iconUI.reset();
-          }, 2000);
+        } else {
+          iconUI.fail();
         }
       };
       xhr.send('url=' + url);
