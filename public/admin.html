@@ -109,7 +109,7 @@
     function getSignedRequest(file){
       var xhr = new XMLHttpRequest();
       xhr.open('GET', `/sign-s3?file-name=${file.name}&file-type=${file.type}`);
-      xhr.onreadystatechange = () => {
+      xhr.onreadystatechange = function() {
         if(xhr.readyState === 4){
           if(xhr.status === 200){
             var response = JSON.parse(xhr.responseText);
@@ -127,7 +127,7 @@
     function uploadFile(file, signedRequest, url){
       var xhr = new XMLHttpRequest();
       xhr.open('PUT', signedRequest);
-      xhr.onreadystatechange = () => {
+      xhr.onreadystatechange = function() {
         if (xhr.readyState === 4){
           if (xhr.status === 200){
             postPost(url);
