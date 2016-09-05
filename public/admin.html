@@ -67,7 +67,7 @@
           successImg.style.display = 'block';
           setTimeout(function() {
             this.reset();
-          }, 2000);
+          }.bind(this), 2000);
         },
         reset: function() {
           successImg.style.display = 'none';
@@ -79,7 +79,7 @@
           failImg.style.display = 'block';
           setTimeout(function() {
             this.reset();
-          }, 2000);
+          }.bind(this), 2000);
         }
       };
     })()
