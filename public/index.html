@@ -148,7 +148,7 @@
       var ext = getUrlExtension(postObj.url);
       if (ext === 'pdf') {
         pdfPreviewModule.openPdf(postObj.url, function() {
-          setTimeout(postCb, 2000);
+          setTimeout(postCb, 200);
         });
       } else {
         appendImage(postObj.url, function() {
