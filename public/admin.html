@@ -17,7 +17,7 @@
       margin: 0;
     }
     input[type="image"], img {
-      width: 20%;
+      height: 40vh;
       margin: auto;
     }
     table {
@@ -145,6 +145,7 @@
         console.log(this.responseText);
         if (this.responseText) {
           // successful upload
+          addPostMarkup(JSON.parse(this.responseText), true); // prepend
           iconUI.success();
         } else {
           iconUI.fail();
@@ -160,11 +161,10 @@
       return JSON.parse(xmlHttp.responseText);
     }
     var posts = httpGet('/posts');
-    posts = posts.reverse();
 
     var tbody = document.getElementById('tbody');
 
-    posts.forEach(function(post) {
+    function addPostMarkup(post, prependFlag) {
       console.log(post);
       var tr = "<tr>";
             tr += "<td>";
@@ -175,8 +175,14 @@
             tr += "</td>"
         tr += "</tr>"
       /* We add the table row to the table body */
-      tbody.innerHTML += tr;
-    });
+      if (!prependFlag) {
+        tbody.innerHTML += tr;
+      } else {
+        tbody.innerHTML = tr + tbody.innerHTML;
+      }
+    }
+
+    posts.forEach(addPostMarkup);
 
     </script>
 

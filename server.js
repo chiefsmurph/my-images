@@ -82,7 +82,7 @@ app.post('/post', auth, function(req, res, next) {
   var url = req.body.url;
   if (url) {
     dbRelated.addPost(url, function(err, result) {
-      res.json( (err ? false : true) );
+      res.json( (err ? false : result.rows[0]) );
       if (!err) {
         console.log('successfully added ' + url);
       } else {
