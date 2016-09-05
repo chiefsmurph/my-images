@@ -2,6 +2,11 @@ html, body {
   margin: 0;
   padding: 0;
   text-align: center;
+
+  /* disable elastic scrolling */
+  height: 100%;
+  width: 100%;
+  overflow: auto;
 }
 canvas, img {
   width: 100%;
