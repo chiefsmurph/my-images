@@ -78,10 +78,15 @@ var postViewer = (function() {
 
   function appendImage(url, cb) {
     if (!canvasContainer) return cb(true);
-    // var img = document.createElement("img");
-    // img.src = url;
-    // img.onLoad = cb();
 
+    // var img = document.createElement("img");
+    //
+    // img.onload = function() {
+    //
+    // };
+    // img.src = url;
+
+    //
     var http = new XMLHttpRequest();
     http.open("GET", url, true);
     http.responseType = "blob";
@@ -89,10 +94,30 @@ var postViewer = (function() {
         if (this.status === 200) {
             var image = new Image();
             image.onload = function() {
+
+              console.log('loaded')
+              try {
+
                 EXIF.getData(image, function() {
-                    alert(EXIF.pretty(this));
+                  var orientation = EXIF.getTag(this, 'Orientation');
+                  var rotation = {
+                    1: 'rotate(0deg)',
+                    3: 'rotate(180deg)',
+                    6: 'rotate(90deg)',
+                    8: 'rotate(270deg)'
+                  };
+                  console.log(orientation);
+
+                  image.style.transform = rotation[orientation];
+
+                  canvasContainer.appendChild(image);
+                  cb();
+                  // cb();
                 });
+              } catch (err) {
+                console.log('err')
                 canvasContainer.appendChild(image);
+              }
             };
             image.src = URL.createObjectURL(http.response);
 
