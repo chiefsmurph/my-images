@@ -117,6 +117,7 @@ var postViewer = (function() {
               } catch (err) {
                 console.log('err')
                 canvasContainer.appendChild(image);
+                cb();
               }
             };
             image.src = URL.createObjectURL(http.response);
