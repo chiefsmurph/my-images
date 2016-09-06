@@ -13,120 +13,17 @@
     <![endif]-->
     <script src="/bower_components/pdfjs-dist/web/compatibility.js"></script>
     <script src="/bower_components/pdfjs-dist/build/pdf.js"></script>
+
+
+    <script src="https://raw.githubusercontent.com/jseidelin/exif-js/master/exif.js"></script>
+    <script src="/js/johns-async.js"></script>
+    <script src="/js/post-viewer.js"></script>
   </head>
   <body>
 
     <div id="container"></div>
 
     <script>
-
-    // helpers
-    var _async = {
-      forEachSeries: function(array, fn, onComplete) {
-        onComplete = onComplete || function() {};
-        (function callFnOnIndex(index, err) {
-          if (index >= array.length || err) { return onComplete(err); }
-          fn(array[index], function(err) {
-            if (index < array.length - 1) {
-              callFnOnIndex(++index, err);
-            } else {
-              onComplete();
-            }
-          });
-        })(0);
-      },
-      waterfall: function(arrayFns, onComplete) {
-        onComplete = onComplete || function() {};
-        (function callFnNumber(index, passVal, err) {
-          if (!arrayFns[index] || err) { return onComplete(err); }
-          var args = [passVal, function(response, err) {
-            callFnNumber(++index, response, err);
-          }].filter(function(el) { return !!el; });
-          arrayFns[index].apply(arrayFns, args);
-        })(0);
-      }
-    };
-
-    var canvasContainer = document.getElementById('container');
-    var pdfPreviewModule = (function() {
-
-      var pdf = {};
-
-      // PDF.js related
-      var PdfJsRelated = {
-
-        openPage: function(pageNumber, cb) {
-          var reqId = pdf.reqId;
-          pdf.doc.getPage(pageNumber).then(function(page) {
-            if (reqId !== pdf.reqId) { return; }
-            var viewport = page.getViewport(2);
-
-            var canvas = document.createElement('canvas');
-            var ctx = canvas.getContext('2d');
-            var renderContext = {
-              canvasContext: ctx,
-              viewport: viewport
-            };
-
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-
-            page.render(renderContext);
-            canvasContainer.appendChild(canvas);
-
-            pdf.docDimensions = pdf.docDimensions || {
-              width: viewport.width,
-              height: viewport.height
-            };
-
-            cb();
-          });
-        },
-
-        renderAllPages: function(onComplete) {
-          var pageArr = Array.apply(null, {length: pdf.doc.numPages}).map(Number.call, Number);
-          _async.forEachSeries(pageArr, function(pageNum, callback) {
-            PdfJsRelated.openPage(pageNum + 1, callback);
-          }, onComplete);
-        },
-
-        openPdfUrl: function(url, cb) {
-
-          pdf.url = url;
-          PDFJS.workerSrc = '/bower_components/pdfjs-dist/build/pdf.worker.js';
-          return PDFJS.getDocument(url).then(function(doc) {
-            pdf.doc = doc;
-            PdfJsRelated.renderAllPages(cb);
-          }).catch(function(error) {
-
-            if (error.name === "InvalidPDFException") {
-              console.error('Unable to load PDF');
-            } else if (error.name === "UnexpectedResponseException" && error.status === 0) {
-              console.error('Unable to load PDF. Check your internet connection.');
-            } else {
-              console.error(error.message);
-            }
-
-          });
-
-        }
-
-      }
-
-
-      return {
-        openPdf: PdfJsRelated.openPdfUrl
-      };
-
-    })();
-
-    function appendImage(url, cb) {
-      var img = document.createElement("img");
-      img.src = url;
-      img.onLoad = cb();
-      canvasContainer.appendChild(img);
-    }
-
 
 
     function httpGet(theUrl) {
@@ -138,26 +35,12 @@
     var posts = httpGet('/posts');
     posts = posts.reverse();
 
-
-    function getUrlExtension(url) {
-      var re = /(?:\.([^.]+))?$/;
-      return re.exec(url)[1];
-    }
+    var canvasContainer = document.getElementById('container');
+    postViewer.setContainer(canvasContainer);
 
     _async.forEachSeries(posts, function(postObj, postCb) {
-      var ext = getUrlExtension(postObj.url);
-      if (ext === 'pdf') {
-        pdfPreviewModule.openPdf(postObj.url, function() {
-          setTimeout(postCb, 200);
-        });
-      } else {
-        appendImage(postObj.url, function() {
-          setTimeout(postCb, 200)
-        });
-      }
+      postViewer.renderFile(postObj.url, postCb);
     });
-
-    console.log(posts);
 
     </script>
 

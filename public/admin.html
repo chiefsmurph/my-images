@@ -12,6 +12,14 @@
       text-align: center;
       padding: 0;
       margin: 0;
+
+      -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none;   /* Chrome/Safari/Opera */
+      -khtml-user-select: none;    /* Konqueror */
+      -moz-user-select: none;      /* Firefox */
+      -ms-user-select: none;       /* Internet Explorer/Edge */
+      user-select: none;           /* Non-prefixed version, currently
+                                      not supported by any browser */
     }
     input[type="image"], img {
       height: 30vh;
@@ -43,8 +51,31 @@
           -ms-hyphens: auto;
               hyphens: auto;
     }
+    #previewer {
+      position: fixed;
+      top: 0; bottom: 0;
+      left: 0; right: 0;
+      display: none;
+      background-color: rgba(255, 255, 255, 0.2)
+    }
+    #previewer img, #previewer canvas {
+      max-width: 99%;
+      height: auto;
+      max-height: 100%;
+      min-height: 100%;
+    }
     </style>
+    <script src="/bower_components/pdfjs-dist/web/compatibility.js"></script>
+    <script src="/bower_components/pdfjs-dist/build/pdf.js"></script>
+
     <script src="/bower_components/jquery/dist/jquery.min.js"></script>
+
+    <script src="//rawgit.com/ngryman/jquery.finger/v0.1.2/dist/jquery.finger.js"></script>
+    <script src="/lib/js/exif.js"></script>
+
+    <script src="/js/johns-async.js"></script>
+    <script src="/js/post-viewer.js"></script>
+
   </head>
   <body>
 
@@ -60,6 +91,8 @@
     <table>
       <tbody id="tbody"></tbody>
     </table>
+
+    <div id="previewer"></div>
 
     <script>
     var uploadImg = document.querySelector('input[type="image"]');
@@ -113,8 +146,15 @@
     $(document).ready(function() {
       $('body').on('change', '#file-input', handleFileUpload);
 
-      $(document).on('dblclick', 'tr', function() {
-        console.log('double')
+      $.Finger = {
+          pressDuration: 300,
+          // doubleTapInterval: 300,
+          // flickDuration: 150,
+          // motionThreshold: 5
+      };
+
+      $(document).on('press', 'tr', function() {
+        console.log('hold')
         var $tr = $(this);
         var id = $tr.children().first().text();
         $.ajax({
@@ -125,8 +165,34 @@
           }
         });
       });
+
+      $(document).on('doubletap', 'tr', function() {
+        console.log('double')
+        var $tr = $(this);
+        var id = Number($tr.children().first().text());
+        var url = getPostFromAttr("id", id).url;
+        postPreviewer.preview(url);
+      });
     });
 
+    var postPreviewer = (function() {
+      var canvasContainer = document.getElementById('previewer');
+      postViewer.setContainer(canvasContainer);
+
+      $(canvasContainer).on('click', function closePreviewer() {
+        $(canvasContainer).empty();
+        $(canvasContainer).hide();
+      });
+
+      return {
+        preview: function(url, cb) {
+          $(canvasContainer).show();
+          postViewer.renderFile(url, function() {
+            if (cb) cb();
+          });
+        }
+      }
+    })();
 
     function getSignedRequest(file){
       var xhr = new XMLHttpRequest();
@@ -180,6 +246,8 @@
       xhr.send('url=' + url);
     }
 
+    // get all posts
+
     function httpGet(theUrl) {
       var xmlHttp = new XMLHttpRequest();
       xmlHttp.open("GET", theUrl, false);
@@ -208,6 +276,16 @@
       } else {
         tbody.innerHTML = tr + tbody.innerHTML;
       }
+    }
+
+    function getPostFromAttr(attr, val) {
+      for (var i = 0; i < posts.length; i++) {
+        if (posts[i][attr] === val) {
+          var url = posts[i].url;
+          return posts[i];
+        }
+      }
+      return null;
     }
 
     posts.forEach(addPostMarkup);
