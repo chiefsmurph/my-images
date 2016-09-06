@@ -108,7 +108,7 @@ var postViewer = (function() {
                   };
                   console.log(orientation);
 
-                  image.style.transform = rotation[orientation];
+                  image.className = 'rotate';
 
                   canvasContainer.appendChild(image);
                   cb();
