@@ -45,7 +45,6 @@
       var $img = $(img);
       var $parent = $img.parent();
       var dims = imgDims[$img.data('url')];
-      debugger;
       var parentWidth = $parent.width();
       $img.css('height', parentWidth + 'px');
       var newHeight = ((dims.width / dims.height) * parentWidth);
