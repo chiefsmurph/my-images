@@ -14,10 +14,13 @@
     <script src="/bower_components/pdfjs-dist/web/compatibility.js"></script>
     <script src="/bower_components/pdfjs-dist/build/pdf.js"></script>
 
+    <script src="/bower_components/jquery/dist/jquery.min.js"></script>
 
     <script src="/lib/js/exif.js"></script>
     <script src="/js/johns-async.js"></script>
     <script src="/js/post-viewer.js"></script>
+    <script src="/js/postManager.js"></script>
+
   </head>
   <body>
 
@@ -26,20 +29,33 @@
     <script>
 
 
-    function httpGet(theUrl) {
-      var xmlHttp = new XMLHttpRequest();
-      xmlHttp.open("GET", theUrl, false);
-      xmlHttp.send(null);
-      return JSON.parse(xmlHttp.responseText);
-    }
-    var posts = httpGet('/posts');
-    posts = posts.reverse();
-
+    var posts = postManager.getAllPosts().reverse();
     var canvasContainer = document.getElementById('container');
     postViewer.setContainer(canvasContainer);
 
     _async.forEachSeries(posts, function(postObj, postCb) {
       postViewer.renderFile(postObj.url, postCb);
+    });
+
+    // handle rotated img's
+    function newRotation(img) {
+      var $img = $(img);
+      var $parent = $img.parent();
+      var dims = imgDims[$img.attr('src')];
+      var parentWidth = $parent.width();
+      $img.css('height', parentWidth + 'px');
+      var newHeight = ((dims.width / dims.height) * parentWidth);
+      $img.css('width', newHeight + 'px');
+      var marginAmt = Math.floor((newHeight - parentWidth) / 2);
+      $img.css('marginTop', marginAmt + 'px');
+      $img.css('marginLeft', '-' + marginAmt + 'px');
+      $img.css('marginBottom', marginAmt + 'px');
+    }
+
+    $(window).on('resize', function() {
+      $('img.rotate').each(function() {
+        newRotation($(this));
+      });
     });
 
     </script>

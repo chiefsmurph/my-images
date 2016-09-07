@@ -1,3 +1,4 @@
+var imgDims = {};
 var postViewer = (function() {
 
   var canvasContainer;
@@ -79,54 +80,75 @@ var postViewer = (function() {
   function appendImage(url, cb) {
     if (!canvasContainer) return cb(true);
 
-    // var img = document.createElement("img");
-    //
-    // img.onload = function() {
-    //
-    // };
-    // img.src = url;
+    var image = document.createElement("img");
+    image.onerror = function() {
+      console.error(url + ' unable to open.');
+      cb();
+    }
+    image.onload = function() {
+      console.log('loaded')
+      try {
 
-    //
-    var http = new XMLHttpRequest();
-    http.open("GET", url, true);
-    http.responseType = "blob";
-    http.onload = function(e) {
-        if (this.status === 200) {
-            var image = new Image();
-            image.onload = function() {
+        EXIF.getData(image, function() {
 
-              console.log('loaded')
-              try {
+          var orientation = EXIF.getTag(this, 'Orientation');
+          var dims = {
+            width: EXIF.getTag(this, 'ImageWidth'),
+            height: EXIF.getTag(this, 'ImageHeight')
+          };
+          imgDims[url] = dims;
+          var rotation = {
+            1: 'rotate(0deg)',
+            3: 'rotate(180deg)',
+            6: 'rotate(90deg)',
+            8: 'rotate(270deg)'
+          };
 
-                EXIF.getData(image, function() {
-                  var orientation = EXIF.getTag(this, 'Orientation');
-                  var rotation = {
-                    1: 'rotate(0deg)',
-                    3: 'rotate(180deg)',
-                    6: 'rotate(90deg)',
-                    8: 'rotate(270deg)'
-                  };
-                  console.log(orientation);
+          canvasContainer.appendChild(image);
 
-                  if (orientation === 6) {
-                    image.className = 'rotate';
-                  }
+          if (orientation === 6) {
+            image.className = 'rotate';
+            newRotation(image);
+          }
 
-                  canvasContainer.appendChild(image);
-                  cb();
-                  // cb();
-                });
-              } catch (err) {
-                console.log('err')
-                canvasContainer.appendChild(image);
-                cb();
-              }
-            };
-            image.src = URL.createObjectURL(http.response);
-
-        }
+          cb();
+          // cb();
+        });
+      } catch (err) {
+        console.log('err')
+        canvasContainer.appendChild(image);
+        cb();
+      }
     };
-    http.send();
+    image.src = url;
+
+    //
+    // try {
+    //   var http = new XMLHttpRequest();
+    //   http.open("GET", url, true);
+    //   http.responseType = "blob";
+    //   http.onerror = function(e) {
+    //     console.log(e, 'asd');
+    //   }
+    //   http.onload = function(e) {
+    //       if (this.status === 200) {
+    //           var image = new Image();
+    //           image.onload = function() {
+    //
+    //
+    //           };
+    //           image.src = URL.createObjectURL(http.response);
+    //
+    //       }
+    //   };
+    //   http.send();
+    //
+    //
+    // } catch (err) {
+    //   console.log('err');
+    //   cb();
+    // }
+
   }
 
   return {
