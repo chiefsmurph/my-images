@@ -151,6 +151,46 @@ var postViewer = (function() {
 
   }
 
+
+
+  function embedVid(url) {
+    if (!canvasContainer) return cb(true);
+
+    var newDiv = document.createElement('div');
+    newDiv.id = url;
+    canvasContainer.appendChild(newDiv);
+    jwplayer(url).setup({
+        'id': url,
+        'wmode': 'transparent',
+        'icons': 'true',
+        'allowscriptaccess': 'always',
+        'allownetworking': 'all',
+        'file': url,
+        'width': '100%', 'height': '100%',
+        'controlbar': 'bottom',
+        'dock': 'false',
+        'provider':'rtmp',
+        'streamer':'rtmp://s2uxp0y7js2nx5.cloudfront.net/cfx/st',
+        'modes': [
+            {type: 'flash', src: '/js/jwplayer/jwplayer.flash.swf'},
+            {
+              type: 'html5',
+              config: {
+               'file': url,
+               'provider': 'video'
+              }
+            },
+            {
+              type: 'download',
+              config: {
+               'file': url,
+               'provider': 'video'
+              }
+            }
+        ]
+    });
+  }
+
   return {
     setContainer: function(el) {
       canvasContainer = el;
@@ -168,6 +208,9 @@ var postViewer = (function() {
             cb(err);
           }, 200);
         });
+      } else if (ext === 'mov' || ext === 'mp4' || ext === 'flv') {
+        embedVid(url);
+        setTimeout(cb, 400);
       } else {
         appendImage(url, function(err) {
           setTimeout(function() {

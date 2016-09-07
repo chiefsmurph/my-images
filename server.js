@@ -121,7 +121,7 @@ const s3 = new aws.S3();
 app.get('/sign-s3', (req, res) => {
   const fileName = req.query['file-name'];
   const fileType = req.query['file-type'];
-  if (['png','pdf', 'gif', 'jpg','jpeg'].indexOf(fileType.split('/')[1]) === -1) {
+  if (['png','pdf', 'gif', 'jpg', 'jpeg', 'quicktime', 'mov', 'mp4', 'flv'].indexOf(fileType.split('/')[1]) === -1) {
     console.log(fileType);
     return res.send(400);
   }
