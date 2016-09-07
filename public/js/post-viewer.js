@@ -200,8 +200,9 @@ var postViewer = (function() {
     renderFile: function(url, cb) {
       var ext = (function getUrlExtension(url) {
         var re = /(?:\.([^.]+))?$/;
-        return re.exec(url)[1];
+        return re.exec(url)[1].toLowerCase();
       })(url);
+      console.log(ext);
       if (ext === 'pdf') {
         pdfPreviewModule.openPdf(url, function(err) {
           setTimeout(function() {
