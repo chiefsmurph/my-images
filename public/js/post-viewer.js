@@ -80,74 +80,75 @@ var postViewer = (function() {
   function appendImage(url, cb) {
     if (!canvasContainer) return cb(true);
 
-    var image = document.createElement("img");
-    image.onerror = function() {
-      console.error(url + ' unable to open.');
-      cb();
-    }
-    image.onload = function() {
-      console.log('loaded')
-      try {
-
-        EXIF.getData(image, function() {
-
-          var orientation = EXIF.getTag(this, 'Orientation');
-          var dims = {
-            width: EXIF.getTag(this, 'ImageWidth'),
-            height: EXIF.getTag(this, 'ImageHeight')
-          };
-          imgDims[url] = dims;
-          var rotation = {
-            1: 'rotate(0deg)',
-            3: 'rotate(180deg)',
-            6: 'rotate(90deg)',
-            8: 'rotate(270deg)'
-          };
-
-          canvasContainer.appendChild(image);
-
-          if (orientation === 6) {
-            image.className = 'rotate';
-            newRotation(image);
-          }
-
-          cb();
-          // cb();
-        });
-      } catch (err) {
-        console.log('err')
-        canvasContainer.appendChild(image);
-        cb();
-      }
-    };
-    image.src = url;
-
-    //
-    // try {
-    //   var http = new XMLHttpRequest();
-    //   http.open("GET", url, true);
-    //   http.responseType = "blob";
-    //   http.onerror = function(e) {
-    //     console.log(e, 'asd');
-    //   }
-    //   http.onload = function(e) {
-    //       if (this.status === 200) {
-    //           var image = new Image();
-    //           image.onload = function() {
-    //
-    //
-    //           };
-    //           image.src = URL.createObjectURL(http.response);
-    //
-    //       }
-    //   };
-    //   http.send();
-    //
-    //
-    // } catch (err) {
-    //   console.log('err');
+    // var image = document.createElement("img");
+    // image.onerror = function() {
+    //   console.error(url + ' unable to open.');
     //   cb();
     // }
+    // image.onload = function() {
+    //
+    // };
+    // image.src = url;
+
+    //
+    try {
+      var http = new XMLHttpRequest();
+      http.open("GET", url, true);
+      http.responseType = "blob";
+      http.onerror = function(e) {
+        console.log(e, 'asd');
+      }
+      http.onload = function(e) {
+          if (this.status === 200) {
+              var image = new Image();
+              image.onload = function() {
+                console.log('loaded')
+                try {
+
+                  EXIF.getData(image, function() {
+
+                    var orientation = EXIF.getTag(this, 'Orientation');
+                    var dims = {
+                      width: EXIF.getTag(this, 'ImageWidth'),
+                      height: EXIF.getTag(this, 'ImageHeight')
+                    };
+                    imgDims[url] = dims;
+                    var rotation = {
+                      1: 'rotate(0deg)',
+                      3: 'rotate(180deg)',
+                      6: 'rotate(90deg)',
+                      8: 'rotate(270deg)'
+                    };
+
+                    canvasContainer.appendChild(image);
+
+                    if (orientation === 6) {
+                      image.setAttribute('data-url', url);
+                      image.className = 'rotate';
+                      newRotation(image);
+                    }
+
+                    cb();
+                    // cb();
+                  });
+                } catch (err) {
+                  console.log('err')
+                  canvasContainer.appendChild(image);
+                  cb();
+                }
+
+              };
+              image.src = URL.createObjectURL(http.response);
+
+          }
+      };
+      http.send();
+
+
+    } catch (err) {
+      console.log('err');
+      cb();
+    }
 
   }
 
@@ -198,6 +199,7 @@ var postViewer = (function() {
     renderPdf: pdfPreviewModule.openPdf,
     renderImg: appendImage,
     renderFile: function(url, cb) {
+      // url = url.replace('https', 'http');
       var ext = (function getUrlExtension(url) {
         var re = /(?:\.([^.]+))?$/;
         return re.exec(url)[1].toLowerCase();
