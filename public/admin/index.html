@@ -64,7 +64,10 @@
       max-height: 100%;
     }
     #previewer img.rotate {
+      -webkit-transform: rotate(90deg);
+      -ms-transform: rotate(90deg);
       transform: rotate(90deg);
+
       /*margin: 11% -16% 16%;
       width: 131%;*/
       height: auto;
@@ -77,6 +80,10 @@
 
     <script src="//rawgit.com/ngryman/jquery.finger/v0.1.2/dist/jquery.finger.js"></script>
     <script src="/lib/js/exif.js"></script>
+
+    <script type="text/javascript" src="/js/jwplayer/jwplayer.js"></script>
+    <script>jwplayer.key="BSVN9rZzfWUEttKUJTVi7eiIkFYRDmjQovWJoA==";</script>
+
 
     <script src="/js/johns-async.js"></script>
     <script src="/js/post-viewer.js"></script>

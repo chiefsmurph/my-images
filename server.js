@@ -71,15 +71,19 @@ app.get('/posts', function(req, res, next) {
 
 // ADMIN
 
+var checkPassword = function(pwd) {
+  return (pwd === process.env.adminPwd);
+};
 var auth = function(req, res, next) {
   // console.log('authorizing');
-  if (req.cookies.pwd === process.env.adminPwd) {
+  if (checkPassword(req.cookies.pwd)) {
     // console.log('pass')
     return next();
   } else {
     console.log('BLOCKED ATTEMPT')
     return res.send(400);
   }
+
 };
 
 
@@ -103,10 +107,13 @@ app.use('/admin', auth, function(req, res) {
   res.sendfile(__dirname + '/public/admin.html');
 });
 
-app.get('/verify/:pass', function(req, res) {
-  console.log('setting')
-  res.cookie('pwd', req.params.pass);
-  res.redirect('/admin');
+app.get('/verify/:pass', function(req, res, next) {
+  if (checkPassword(req.params.pass)) {
+    res.cookie('pwd', req.params.pass);
+    res.send('You have now been authorized.  <br>You can now access the admin panel at /admin.  <br>Click here to continue to the admin panel or wait to be redirected.<script>setTimeout(function(){ window.location = "/admin"}, 4000);</script>');
+  } else {
+    next();
+  }
 });
 
 
@@ -121,8 +128,9 @@ const s3 = new aws.S3();
 app.get('/sign-s3', (req, res) => {
   const fileName = req.query['file-name'];
   const fileType = req.query['file-type'];
+  console.log('asd', fileType);
   if (['png','pdf', 'gif', 'jpg', 'jpeg', 'quicktime', 'mov', 'mp4', 'flv'].indexOf(fileType.split('/')[1]) === -1) {
-    console.log(fileType);
+    console.log('here', fileType);
     return res.send(400);
   }
   const s3Params = {
