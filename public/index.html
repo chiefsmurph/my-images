@@ -38,6 +38,9 @@
 
     _async.forEachSeries(posts, function(postObj, postCb) {
       postViewer.renderFile(postObj.url, postCb);
+    }, function() {
+      console.log("page scroll");
+      pageScroll();
     });
 
     // handle rotated img's
@@ -53,6 +56,11 @@
       $img.css('marginTop', marginAmt + 'px');
       $img.css('marginLeft', '-' + marginAmt + 'px');
       $img.css('marginBottom', marginAmt + 'px');
+    }
+
+    function pageScroll() {
+        window.scrollBy(0,1);
+        scrolldelay = setTimeout(pageScroll,10);
     }
 
     $(window).on('resize', function() {
